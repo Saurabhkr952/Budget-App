@@ -4,22 +4,12 @@ WORKDIR /app
 
 # Install system dependencies and cleanup
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    libvips \
-    bash \
-    bash-completion \
-    libffi-dev \
-    tzdata \
-    postgresql \
-    nodejs \
-    npm \
-    yarn && \
+    apt-get install -y build-essential libvips bash bash-completion libffi-dev tzdata postgresql nodejs npm yarn && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
 # Copy Gemfile and Gemfile.lock to the build stage
-COPY Gemfile  ./
+COPY Gemfile Gemfile.lock ./
 
 # Install gems (dependencies) for the application
 RUN bundle install
@@ -37,7 +27,7 @@ ENV RAILS_LOG_TO_STDOUT="1" \
 RUN bundle exec bootsnap precompile --gemfile app/ lib/ 
 
 # Build the application (you may customize this step)
-RUN bundle exec rake assets:precompile
+RUN bundle exec rake assets:precompile 
     
 # Runtime stage
 FROM ruby:3.1.4-slim
@@ -75,4 +65,3 @@ ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 # Start your application (adjust the command as needed)
 CMD ["rails", "server", "-b", "0.0.0.0"]
-
