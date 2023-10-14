@@ -1,8 +1,27 @@
 version: '3'
 services:
-  db:
+  web-app: 
+    build: 
+      context: .
+      dockerfile: Dockerfile.multistaging
+    command: "rails server"
+    container_name: ruby-on-rails
+    environment:
+      - RAILS_ENV=${RAILS_ENV}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB} 
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+    volumes:
+      - app-storage:/budget-app/storage
+    depends_on:
+      - database
+    ports:
+      - "3000:3000"
+  database:
     image: postgres:14.2-alpine
-    container_name: demo-postgres-14.2
+    container_name: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command: 
@@ -13,22 +32,6 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
-  demo-web:
-    build: .
-    command: "rails server"
-    environment:
-      - RAILS_ENV=${RAILS_ENV}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
-    volumes:
-      - app-storage:/budget-app/storage
-    depends_on:
-      - db
-    ports:
-      - "3000:3000"
 
 volumes:
   postgres_data: {}
